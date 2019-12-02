@@ -1,0 +1,90 @@
+import sqlite3
+from library.book import book
+from library.publisher import publisher
+
+
+def open_connection():
+    connection = sqlite3.connect("library.db")
+    cursor = connection.cursor()
+    return connection, cursor
+
+
+def close_connection(connection, cursor):
+    cursor.close()
+    connection.close()
+
+
+def create_books_table():
+    try:
+        connection, cursor = open_connection()
+        query = """CREATE TABLE IF NOT EXISTS books (
+                        book_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        book_name TEXT UNIQUE,
+                        author TEXT,
+                        selling_price REAL)
+                    """
+
+        cursor.execute(query)
+
+    except sqlite3.DatabaseError as error:
+        print(error)
+
+    finally:
+        close_connection(connection, cursor)
+
+
+def query_database(query, params):
+    try:
+        connection, cursor = open_connection()
+        cursor.execute(query, params)
+        connection.commit()
+
+        data = cursor.fetchall()
+        print(data)
+
+    except sqlite3.DataError as error:
+        print(error)
+    finally:
+        connection.close()
+
+
+def create_book(book):
+    query = """INSERT INTO books VALUES (? ,?, ?, ?)"""
+    params = (book.book_id, book.book_name, book.author, book.selling_price)
+    query_database(query, params)
+
+
+book1 = book(None, "Bet kas 123", "Kazkas", 12)
+
+# create_book(book1)
+
+
+def get_book(book):
+    query = """SELECT * FROM books
+    WHERE book_id = (?) OR book_name = (?) OR author = (?) OR selling_price = (?)"""
+    params = (book.book_id, book.book_name, book.author, book.selling_price)
+    query_database(query, params)
+
+
+get_book(book1)
+
+
+def update_book(book):
+    query = """UPDATE books SET book_name = 'tram pam pam'
+    WHERE book_name = (?)"""
+    params = (book.book_name,)
+    query_database(query, params)
+
+
+update_book(book1)
+get_book(book1)
+
+
+def delete_book(book):
+    query = """DELETE FROM books
+    WHERE book_name = (?) OR book_id = (?) OR author = (?) OR selling_price = (?)"""
+    params = (book.book_name, book.book_id, book.author, book.selling_price)
+    query_database(query, params)
+
+
+delete_book(book1)
