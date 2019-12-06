@@ -88,3 +88,30 @@ def delete_book(book):
 
 
 delete_book(book1)
+
+def create_table_junction():
+    try:
+        connection = sqlite3.connect("books.db")
+        connection_cursor = connection.cursor()
+        connection_cursor.execute("""CREATE TABLE IF NOT EXISTS junction (
+                                                    first_id int,
+                                                    second_id int,
+                                                    FOREIGN KEY (first_id) REFERENCES books(book_id),
+                                                    FOREIGN KEY (second_id) REFERENCES publishers(publisher_id)
+                                                    )""")
+        connection.commit()
+
+    except sqlite3.DataError as error:
+        print(error)
+
+    finally:
+        connection.close()
+
+create_junction()
+
+
+
+def insert_junction():
+    insert_query = """INSERT INTO junction VALUES (SELECT book_id FROM books WHERE book_name = (?))"""
+    junction = [first_id, second_id, book_id, publisher_id]
+    execute_query(insert_query, junction)
